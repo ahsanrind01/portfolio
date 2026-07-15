@@ -26,14 +26,13 @@ const projects: Project[] = [
     ],
   },
   {
-    title: 'MindBridge',
-    tags: ['React', 'Node.js', 'MongoDB', 'JWT Auth', 'Cloudinary'],
+    title: 'NexusTrade',
+    tags: ['React Native', 'Node.js', 'TypeScript', 'Kafka', 'PostgreSQL', 'Redis', 'Stripe'],
     description:
-      'Mental health platform connecting patients with verified professionals. Smart appointment booking, wellness tracking, and an admin CMS for content moderation.',
-    image: '/images/mindbridge-thumb.jpg',
+      'Production-grade cryptocurrency exchange platform built on a distributed microservices architecture with a native mobile trading app. Covers the full flow end-to-end — auth, wallet funding, order placement, in-memory order book matching, ledger settlement, and live market data streaming over WebSockets.',
+    image: '/images/nexustrade-thumb.jpg',
     links: [
-      { label: 'View Project', url: '#' },
-      { label: 'GitHub', url: '#' },
+      { label: 'GitHub', url: 'https://github.com/ahsanrind01/NexusTrade' },
     ],
   },
   {

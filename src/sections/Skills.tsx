@@ -12,15 +12,23 @@ interface SkillCategory {
 const skillCategories: SkillCategory[] = [
   {
     label: 'Mobile / Frontend',
-    skills: ['React Native (Expo)', 'Expo Router', 'React.js', 'Expo Notifications'],
+    skills: ['React Native (Expo)', 'Expo Router', 'React.js', 'Zustand', 'TanStack Query', 'Reanimated'],
   },
   {
     label: 'Backend',
-    skills: ['Node.js', 'Express.js', 'REST API Design', 'Socket.io'],
+    skills: ['Node.js', 'Express.js', 'TypeScript', 'REST API Design', 'Socket.io', 'JWT Auth'],
   },
   {
-    label: 'Database',
-    skills: ['MongoDB', 'Mongoose ODM'],
+    label: 'Distributed Systems',
+    skills: ['Apache Kafka', 'Microservices Architecture', 'API Gateway Design', 'Event-Driven Systems', 'Docker'],
+  },
+  {
+    label: 'Databases & Caching',
+    skills: ['PostgreSQL', 'MongoDB', 'Drizzle ORM', 'Mongoose ODM', 'Redis'],
+  },
+  {
+    label: 'AI & Agents',
+    skills: ['OpenAI SDK', 'Anthropic Claude / Agent SDK', 'AI Agent Design', 'LLM Integration', 'Prompt Engineering'],
   },
   {
     label: 'Payments & Messaging',
@@ -32,7 +40,7 @@ const skillCategories: SkillCategory[] = [
   },
   {
     label: 'Tools',
-    skills: ['Git', 'GitHub', 'VS Code', 'Postman'],
+    skills: ['Git', 'GitHub', 'Docker', 'Postman', 'VS Code'],
   },
 ];
 
@@ -118,7 +126,7 @@ export default function Skills() {
               className="mt-6 text-lg"
               style={{ color: '#6B6B7B', lineHeight: 1.65, letterSpacing: '0.01em' }}
             >
-              Versatile full-stack engineer with deep expertise in mobile and web development, payment systems, and real-time applications.
+              Full-stack engineer spanning mobile and distributed backend systems, with hands-on experience integrating AI agents into production applications.
             </p>
           </div>
 

@@ -125,10 +125,11 @@ export default function MorphOrbBackground() {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    const mountEl = mountRef.current;
+    if (!mountEl) return;
 
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 2000 : 4000;
+    const particleCount = isMobile ? 1000 : 2200;
     const spread = 120;
 
     // Scene setup
@@ -144,10 +145,10 @@ export default function MorphOrbBackground() {
     );
     camera.position.z = 50;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mountRef.current.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    mountEl.appendChild(renderer.domElement);
 
     const canvasEl = renderer.domElement;
     canvasEl.style.position = 'fixed';
@@ -209,7 +210,7 @@ export default function MorphOrbBackground() {
 
     const uniforms = {
       uTime: { value: 0.0 },
-      uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) },
       uOpacity: { value: 0.9 },
     };
 
@@ -237,7 +238,7 @@ export default function MorphOrbBackground() {
     graphGroup.position.z = -14;
     scene.add(graphGroup);
 
-    const nodeCount = isMobile ? 16 : 26;
+    const nodeCount = isMobile ? 10 : 18;
     const nodeSpreadX = 55;
     const nodeSpreadY = 65;
     const nodeSpreadZ = 16;
@@ -294,7 +295,7 @@ export default function MorphOrbBackground() {
     nodeGeometry.setAttribute('size', new THREE.BufferAttribute(nodeSizes, 1));
     const nodeUniforms = {
       uTime: { value: 0.0 },
-      uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) },
       uOpacity: { value: 1.0 },
     };
     const nodeMaterial = new THREE.ShaderMaterial({
@@ -375,23 +376,44 @@ export default function MorphOrbBackground() {
       mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
     };
 
+    let resizePending = false;
+    let resizeRafId = 0;
     const onResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      material.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
-      nodeMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+      if (resizePending) return;
+      resizePending = true;
+      resizeRafId = requestAnimationFrame(() => {
+        resizePending = false;
+        resizeRafId = 0;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+        material.uniforms.uPixelRatio.value = pixelRatio;
+        nodeMaterial.uniforms.uPixelRatio.value = pixelRatio;
+      });
+    };
+
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(animate);
+      }
     };
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     // Check reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const animate = () => {
+      if (document.hidden) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
       animationId = requestAnimationFrame(animate);
 
       const elapsed = clock.getElapsedTime();
@@ -443,9 +465,12 @@ export default function MorphOrbBackground() {
         // Cursor repulsion, same language as the particle field
         const dx = tx - gMouseWorldX;
         const dy = ty - gMouseWorldY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 26 && dist > 0.1) {
-          const force = ((26 - dist) / 26) * 6;
+        const distSq = dx * dx + dy * dy;
+        const maxDist = 26;
+        const maxDistSq = maxDist * maxDist;
+        if (distSq < maxDistSq && distSq > 0.01) {
+          const dist = Math.sqrt(distSq);
+          const force = ((maxDist - dist) / maxDist) * 6;
           tx += (dx / dist) * force;
           ty += (dy / dist) * force;
         }
@@ -544,9 +569,12 @@ export default function MorphOrbBackground() {
           // Mouse repulsion
           const dx = x - mouseWorldX;
           const dy = y - mouseWorldY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 20 && dist > 0.1) {
-            const force = (20 - dist) / 20 * 0.15;
+          const distSq = dx * dx + dy * dy;
+          const maxDist = 20;
+          const maxDistSq = maxDist * maxDist;
+          if (distSq < maxDistSq && distSq > 0.01) {
+            const dist = Math.sqrt(distSq);
+            const force = (maxDist - dist) / maxDist * 0.15;
             x += (dx / dist) * force;
             y += (dy / dist) * force;
           }
@@ -595,8 +623,10 @@ export default function MorphOrbBackground() {
 
     return () => {
       cancelAnimationFrame(animationId);
+      cancelAnimationFrame(resizeRafId);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       renderer.dispose();
       geometry.dispose();
       material.dispose();
@@ -604,9 +634,7 @@ export default function MorphOrbBackground() {
       nodeMaterial.dispose();
       edgeGeometry.dispose();
       edgeMaterial.dispose();
-      if (mountRef.current) {
-        mountRef.current.innerHTML = '';
-      }
+      mountEl.innerHTML = '';
     };
   }, []);
 

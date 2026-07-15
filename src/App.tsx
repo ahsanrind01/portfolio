@@ -1,6 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useRef, useCallback } from 'react';
 import Lenis from 'lenis';
-import MorphOrbBackground from './sections/MorphOrbBackground';
 import SignalTrace from './sections/SignalTrace';
 import Navigation from './sections/Navigation';
 import Hero from './sections/Hero';
@@ -9,6 +8,8 @@ import Skills from './sections/Skills';
 import About from './sections/About';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
+
+const MorphOrbBackground = lazy(() => import('./sections/MorphOrbBackground'));
 
 export default function App() {
   const lenisRef = useRef<Lenis | null>(null);
@@ -22,7 +23,9 @@ export default function App() {
     lenisRef.current = lenis;
 
     function raf(time: number) {
-      lenis.raf(time);
+      if (!document.hidden) {
+        lenis.raf(time);
+      }
       requestAnimationFrame(raf);
     }
 
@@ -42,7 +45,9 @@ export default function App() {
 
   return (
     <>
-      <MorphOrbBackground />
+      <Suspense fallback={null}>
+        <MorphOrbBackground />
+      </Suspense>
       <SignalTrace />
       <Navigation onNavigate={handleNavigate} />
       <main>

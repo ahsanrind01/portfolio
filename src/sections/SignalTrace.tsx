@@ -55,7 +55,9 @@ export default function SignalTrace() {
   const trailRefs = useRef<(SVGCircleElement | null)[]>([]);
   const padRefs = useRef<(SVGGElement | null)[]>([]);
   const waypointsRef = useRef<Point[]>([]);
+  const sampledPointsRef = useRef<Point[]>([]);
   const pathLenRef = useRef(0);
+  const padRenderStateRef = useRef<{ opacity: number; scale: number }[]>([]);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -103,6 +105,17 @@ export default function SignalTrace() {
         pathLenRef.current = len;
         glowPath.setAttribute('stroke-dasharray', `${len}`);
         corePath.setAttribute('stroke-dasharray', `${len}`);
+
+        const sampleCount = 200;
+        const sampledPoints: Point[] = [];
+        if (len > 0) {
+          for (let i = 0; i < sampleCount; i++) {
+            const sampleLength = (len * i) / (sampleCount - 1);
+            const p = corePath.getPointAtLength(sampleLength);
+            sampledPoints.push({ x: p.x, y: p.y });
+          }
+        }
+        sampledPointsRef.current = sampledPoints;
       });
 
       padRefs.current.forEach((g, i) => {
@@ -147,6 +160,7 @@ export default function SignalTrace() {
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
+      if (document.hidden) return;
 
       const len = pathLenRef.current;
       if (len <= 0) return;
@@ -164,27 +178,34 @@ export default function SignalTrace() {
       const g = Math.round(dark.g + (light.g - dark.g) * themeBlend);
       const b = Math.round(dark.b + (light.b - dark.b) * themeBlend);
       const color = `rgb(${r}, ${g}, ${b})`;
-
-      corePath.setAttribute('stroke', color);
-      glowPath.setAttribute('stroke', color);
-      tickPath.setAttribute('stroke', color);
-      dotRef.current?.setAttribute('fill', color);
-      trailRefs.current.forEach((el) => el?.setAttribute('fill', color));
-      padRefs.current.forEach((g) => {
-        if (!g) return;
-        g.style.color = color;
-        const shape = g.firstElementChild as SVGElement | null;
-        shape?.setAttribute('stroke', color);
-      });
+      svg.style.setProperty('--signal-color', color);
 
       if (!prefersReducedMotion) {
-        const pt = corePath.getPointAtLength(progress * len);
+        const sampledPoints = sampledPointsRef.current;
+        let ptX = 0;
+        let ptY = 0;
+
+        if (sampledPoints.length > 0) {
+          if (sampledPoints.length === 1) {
+            ptX = sampledPoints[0].x;
+            ptY = sampledPoints[0].y;
+          } else {
+            const samplePos = progress * (sampledPoints.length - 1);
+            const sampleIndex = Math.floor(samplePos);
+            const sampleT = samplePos - sampleIndex;
+            const p0 = sampledPoints[sampleIndex];
+            const p1 = sampledPoints[Math.min(sampleIndex + 1, sampledPoints.length - 1)];
+            ptX = p0.x + (p1.x - p0.x) * sampleT;
+            ptY = p0.y + (p1.y - p0.y) * sampleT;
+          }
+        }
+
         if (dotRef.current) {
-          dotRef.current.setAttribute('cx', `${pt.x}`);
-          dotRef.current.setAttribute('cy', `${pt.y}`);
+          dotRef.current.setAttribute('cx', `${ptX}`);
+          dotRef.current.setAttribute('cy', `${ptY}`);
           dotRef.current.setAttribute('opacity', '1');
         }
-        trail.unshift({ x: pt.x, y: pt.y });
+        trail.unshift({ x: ptX, y: ptY });
         if (trail.length > 6) trail.length = 6;
         trailRefs.current.forEach((el, i) => {
           const tp = trail[i + 1];
@@ -199,14 +220,27 @@ export default function SignalTrace() {
       // Pads brighten as the viewport passes each one.
       const viewCenter = window.scrollY + window.innerHeight / 2;
       const pts = waypointsRef.current;
+      const padState = padRenderStateRef.current;
       for (let i = 1; i < pts.length - 1; i++) {
         const g = padRefs.current[i - 1];
         if (!g) continue;
         const dist = Math.abs(pts[i].y - viewCenter);
         const active = Math.max(0, 1 - dist / 260);
-        g.style.opacity = `${0.3 + active * 0.7}`;
-        const scale = (1 + active * 0.5).toFixed(2);
-        g.setAttribute('transform', `translate(${pts[i].x.toFixed(1)}, ${pts[i].y.toFixed(1)}) scale(${scale})`);
+        const opacity = 0.3 + active * 0.7;
+        const scale = 1 + active * 0.5;
+        const last = padState[i - 1] || { opacity: -1, scale: -1 };
+        if (Math.abs(opacity - last.opacity) > 0.01) {
+          g.style.opacity = `${opacity}`;
+          last.opacity = opacity;
+        }
+        if (Math.abs(scale - last.scale) > 0.01) {
+          g.setAttribute(
+            'transform',
+            `translate(${pts[i].x.toFixed(1)}, ${pts[i].y.toFixed(1)}) scale(${scale.toFixed(2)})`
+          );
+          last.scale = scale;
+        }
+        padState[i - 1] = last;
       }
     };
 
@@ -255,6 +289,7 @@ export default function SignalTrace() {
       <path
         ref={glowPathRef}
         fill="none"
+        stroke="var(--signal-color)"
         strokeWidth={5}
         strokeLinecap="round"
         opacity={0.35}
@@ -265,6 +300,7 @@ export default function SignalTrace() {
       <path
         ref={tickPathRef}
         fill="none"
+        stroke="var(--signal-color)"
         strokeWidth={1}
         strokeDasharray="1 13"
         opacity={0.3}
@@ -274,6 +310,7 @@ export default function SignalTrace() {
       <path
         ref={corePathRef}
         fill="none"
+        stroke="var(--signal-color)"
         strokeWidth={1.6}
         strokeLinecap="round"
         opacity={0.9}
@@ -282,14 +319,14 @@ export default function SignalTrace() {
       {/* Chip-pad markers at each section */}
       {SECTION_IDS.map((id, i) => (
         <g key={id} ref={(el) => { padRefs.current[i] = el; }} style={{ transition: 'opacity 0.4s ease' }}>
-          <rect x={-5} y={-5} width={10} height={10} fill="none" strokeWidth={1.2} transform="rotate(45)" />
-          <circle r={1.6} fill="currentColor" />
+          <rect x={-5} y={-5} width={10} height={10} fill="none" stroke="var(--signal-color)" strokeWidth={1.2} transform="rotate(45)" />
+          <circle r={1.6} fill="var(--signal-color)" />
           <text
             x={10}
             y={4}
             fontFamily="'JetBrains Mono', monospace"
             fontSize={9}
-            fill="currentColor"
+            fill="var(--signal-color)"
             opacity={0.55}
           >
             {`0x0${i + 1}`}
@@ -303,10 +340,11 @@ export default function SignalTrace() {
           key={i}
           ref={(el) => { trailRefs.current[i] = el; }}
           r={2.2 - i * 0.3}
+          fill="var(--signal-color)"
           opacity={0}
         />
       ))}
-      <circle ref={dotRef} r={3.5} filter="url(#signal-glow-dot)" opacity={0} />
+      <circle ref={dotRef} r={3.5} fill="var(--signal-color)" filter="url(#signal-glow-dot)" opacity={0} />
     </svg>
   );
 }
