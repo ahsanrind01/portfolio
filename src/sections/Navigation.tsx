@@ -70,6 +70,22 @@ export default function Navigation({ onNavigate }: NavigationProps) {
             {link.label}
           </button>
         ))}
+        <a
+          href="/resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          className="font-space text-[13px] font-medium uppercase tracking-[0.1em] transition-colors duration-300"
+          style={{ color: mutedColor }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#D4A853';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = mutedColor;
+          }}
+        >
+          RESUME
+        </a>
       </div>
     </nav>
   );
