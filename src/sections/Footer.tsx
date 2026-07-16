@@ -8,9 +8,6 @@ export default function Footer() {
       <p className="text-[13px]" style={{ color: '#6B6B7B' }}>
         © 2025 Ehsan Ul Haq
       </p>
-      <p className="text-[13px] mt-2 md:mt-0" style={{ color: '#6B6B7B' }}>
-        Crafted with React & Three.js
-      </p>
     </footer>
   );
 }

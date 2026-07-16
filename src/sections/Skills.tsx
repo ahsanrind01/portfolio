@@ -101,7 +101,7 @@ export default function Skills() {
         WebkitBackdropFilter: 'blur(5px)',
       }}
     >
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-[120px]">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-12 py-20 md:py-[120px]">
         <div className="flex flex-col md:flex-row gap-16 md:gap-20">
           {/* Left column - 38% */}
           <div ref={leftRef} className="md:w-[38%]">
@@ -114,7 +114,7 @@ export default function Skills() {
             <h2
               className="font-space font-bold uppercase"
               style={{
-                fontSize: 'clamp(40px, 6vw, 64px)',
+                fontSize: 'clamp(32px, 6vw, 64px)',
                 lineHeight: 0.95,
                 letterSpacing: '-0.02em',
                 color: '#0D0D12',
@@ -123,7 +123,7 @@ export default function Skills() {
               SKILLS
             </h2>
             <p
-              className="mt-6 text-lg"
+              className="mt-6 text-base md:text-lg"
               style={{ color: '#6B6B7B', lineHeight: 1.65, letterSpacing: '0.01em' }}
             >
               Full-stack engineer spanning mobile and distributed backend systems, with hands-on experience integrating AI agents into production applications.

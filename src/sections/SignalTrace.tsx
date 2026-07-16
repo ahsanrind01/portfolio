@@ -124,23 +124,13 @@ export default function SignalTrace() {
       });
     };
 
-    buildPath();
-    const lateRebuilds = [100, 500, 1400].map((t) => window.setTimeout(buildPath, t));
-
-    let resizeTimer: number;
-    const onResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(buildPath, 200);
-    };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('load', buildPath);
-
     const themeEls = Array.from(document.querySelectorAll<HTMLElement>('[data-bg-theme]'));
     const dark = { r: 0xd4, g: 0xa8, b: 0x53 };
     const light = { r: 0x8a, g: 0x5a, b: 0x2b };
     let themeBlend = 0;
+    let targetThemeBlend = 0;
 
-    const getTargetThemeBlend = () => {
+    const updateTargetThemeBlend = () => {
       let darkCoverage = 0;
       let lightCoverage = 0;
       const vh = window.innerHeight;
@@ -152,8 +142,31 @@ export default function SignalTrace() {
         else darkCoverage += visible;
       }
       const total = darkCoverage + lightCoverage;
-      return total > 0 ? lightCoverage / total : themeBlend;
+      targetThemeBlend = total > 0 ? lightCoverage / total : themeBlend;
     };
+
+    let themeBlendRaf = 0;
+    const scheduleThemeBlendUpdate = () => {
+      if (themeBlendRaf) return;
+      themeBlendRaf = requestAnimationFrame(() => {
+        themeBlendRaf = 0;
+        updateTargetThemeBlend();
+      });
+    };
+
+    buildPath();
+    updateTargetThemeBlend();
+    const lateRebuilds = [100, 500, 1400].map((t) => window.setTimeout(buildPath, t));
+
+    let resizeTimer: number;
+    const onResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(buildPath, 200);
+      updateTargetThemeBlend();
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', scheduleThemeBlendUpdate, { passive: true });
+    window.addEventListener('load', buildPath);
 
     const trail: Point[] = [];
     let rafId: number;
@@ -172,8 +185,7 @@ export default function SignalTrace() {
       corePath.setAttribute('stroke-dashoffset', `${dashoffset}`);
       glowPath.setAttribute('stroke-dashoffset', `${dashoffset}`);
 
-      const target = getTargetThemeBlend();
-      themeBlend += (target - themeBlend) * 0.05;
+      themeBlend += (targetThemeBlend - themeBlend) * 0.05;
       const r = Math.round(dark.r + (light.r - dark.r) * themeBlend);
       const g = Math.round(dark.g + (light.g - dark.g) * themeBlend);
       const b = Math.round(dark.b + (light.b - dark.b) * themeBlend);
@@ -248,7 +260,9 @@ export default function SignalTrace() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      cancelAnimationFrame(themeBlendRaf);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', scheduleThemeBlendUpdate);
       window.removeEventListener('load', buildPath);
       window.clearTimeout(resizeTimer);
       lateRebuilds.forEach((t) => window.clearTimeout(t));

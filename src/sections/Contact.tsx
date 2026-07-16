@@ -76,7 +76,7 @@ export default function Contact() {
         WebkitBackdropFilter: 'blur(5px)',
       }}
     >
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-[120px] text-center">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-12 py-20 md:py-[120px] text-center">
         <p
           className="contact-animate font-mono text-[11px] font-medium uppercase tracking-[0.14em] mb-4"
           style={{ color: '#D4A853' }}
@@ -86,7 +86,7 @@ export default function Contact() {
         <h2
           className="contact-animate font-space font-bold uppercase"
           style={{
-            fontSize: 'clamp(36px, 5vw, 64px)',
+            fontSize: 'clamp(30px, 5vw, 64px)',
             lineHeight: 0.95,
             letterSpacing: '-0.02em',
             color: '#0D0D12',
@@ -95,14 +95,14 @@ export default function Contact() {
           LET'S BUILD
         </h2>
         <p
-          className="contact-animate mt-6 text-lg"
+          className="contact-animate mt-6 text-base md:text-lg"
           style={{ color: '#6B6B7B', lineHeight: 1.65, letterSpacing: '0.01em' }}
         >
           Open to collaborations, freelance projects, and full-stack opportunities.
         </p>
 
         {/* Contact links */}
-        <div className="contact-animate mt-12 flex flex-wrap justify-center gap-8 md:gap-10">
+        <div className="contact-animate mt-12 flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-8 md:gap-10">
           {contactLinks.map((link) => (
             <a
               key={link.label}

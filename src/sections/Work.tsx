@@ -856,7 +856,7 @@ function FeaturedProjectCard({ project, cardRef }: { project: Project; cardRef: 
     >
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] items-center">
         {/* Content */}
-        <div className="p-8 md:p-12 lg:p-14 order-2 lg:order-1">
+        <div className="p-6 sm:p-8 md:p-12 lg:p-14 order-1 lg:order-1">
           <span
             className="inline-block font-mono uppercase tracking-[0.14em] px-2.5 py-1 rounded-sm mb-6"
             style={{ fontSize: 10, color: GOLD, border: '1px solid rgba(212, 168, 83, 0.4)', background: 'rgba(212, 168, 83, 0.06)' }}
@@ -892,8 +892,8 @@ function FeaturedProjectCard({ project, cardRef }: { project: Project; cardRef: 
         </div>
 
         {/* Phone preview */}
-        <div className="relative flex items-center justify-center p-10 md:p-14 order-1 lg:order-2">
-          <PhoneMockup src={project.videoSrc} title={project.title} widthClamp="clamp(220px, 21vw, 300px)" />
+        <div className="relative flex items-center justify-center p-5 sm:p-8 md:p-14 order-2 lg:order-2">
+          <PhoneMockup src={project.videoSrc} title={project.title} widthClamp="clamp(180px, 70vw, 300px)" />
         </div>
       </div>
 
@@ -916,10 +916,9 @@ function CompactProjectCard({ project, cardRef }: { project: Project; cardRef: (
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.15fr]">
         {/* Video preview — plain square frame, no phone chrome, just larger than before */}
         <div
-          className="relative overflow-hidden group"
+          className="relative overflow-hidden group min-h-[260px] sm:min-h-[320px]"
           style={{
             aspectRatio: '1 / 1',
-            minHeight: 320,
             borderRight: '1px solid rgba(240, 237, 230, 0.08)',
             background:
               'radial-gradient(circle at 1px 1px, rgba(240,237,230,0.06) 1px, transparent 0) top left / 18px 18px, rgba(255,255,255,0.015)',
@@ -1038,7 +1037,7 @@ export default function Work() {
         }
       `}</style>
 
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-[120px]">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-12 py-20 md:py-[120px]">
         {/* Section header */}
         <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
@@ -1051,7 +1050,7 @@ export default function Work() {
             <h2
               className="work-header font-space font-bold uppercase"
               style={{
-                fontSize: 'clamp(40px, 6vw, 64px)',
+                fontSize: 'clamp(32px, 6vw, 64px)',
                 lineHeight: 0.95,
                 letterSpacing: '-0.02em',
                 color: INK,

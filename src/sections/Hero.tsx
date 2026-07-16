@@ -136,14 +136,14 @@ export default function Hero({ onNavigate }: HeroProps) {
       ref={sectionRef}
       id="hero"
       data-bg-theme="dark"
-      className="relative z-10 flex flex-col items-center justify-center min-h-screen overflow-hidden"
+      className="relative z-10 flex flex-col items-center justify-center min-h-[100svh] sm:min-h-screen overflow-hidden py-20 sm:py-0"
     >
       {/* Signature element: a faint distributed-trace line running behind the
           headline — a packet moving hop to hop, nodes lighting up as it lands.
           Reads as "engineering," stays quiet, never competes with the copy. */}
       <svg
         ref={traceRef}
-        className="absolute pointer-events-none opacity-0"
+        className="hidden sm:block absolute pointer-events-none opacity-0"
         style={{
           top: '50%',
           left: '50%',
@@ -191,11 +191,11 @@ export default function Hero({ onNavigate }: HeroProps) {
         )}
       </svg>
 
-      <div className="relative text-center px-4 max-w-[760px] mx-auto">
+      <div className="relative text-center px-4 max-w-[460px] sm:max-w-[760px] mx-auto">
         {/* Eyebrow — leads with what he specializes in, not who he is */}
         <div
           ref={eyebrowRef}
-          className="font-mono-jb flex items-center justify-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.22em] mb-8 opacity-0 translate-y-2.5"
+          className="hidden sm:flex font-mono-jb flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:gap-2.5 text-[11px] font-medium uppercase tracking-[0.22em] mb-8 opacity-0 translate-y-2.5"
           style={{ color: MUTE, filter: 'blur(6px)' }}
         >
           <span
@@ -228,12 +228,12 @@ export default function Hero({ onNavigate }: HeroProps) {
               style={{ paddingBottom: '0.08em' }}
             >
               <span
-                ref={(el) => {
-                  lineInnerRefs.current[i] = el;
-                }}
+              ref={(el) => {
+                lineInnerRefs.current[i] = el;
+              }}
                 className="block"
                 style={{
-                  fontSize: 'clamp(32px, 6.4vw, 68px)',
+                  fontSize: 'clamp(28px, 8vw, 68px)',
                   letterSpacing: '-0.02em',
                   color: INK,
                   transform: 'translateY(112%)',
@@ -251,15 +251,12 @@ export default function Hero({ onNavigate }: HeroProps) {
         {/* Subtext — outcomes, not stack */}
         <p
           ref={subtitleRef}
-          className="mt-7 opacity-0 translate-y-2.5"
+          className="mt-7 opacity-0 translate-y-2.5 max-w-[320px] sm:max-w-[560px] mx-auto"
           style={{
             color: MUTE,
-            fontSize: 'clamp(15px, 1.6vw, 17px)',
+            fontSize: 'clamp(13px, 1.6vw, 17px)',
             lineHeight: 1.65,
             letterSpacing: '0.01em',
-            maxWidth: '560px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
             filter: 'blur(6px)',
           }}
         >
@@ -271,13 +268,13 @@ export default function Hero({ onNavigate }: HeroProps) {
         {/* Capability strip — what he actually builds, stated plainly */}
         <div
           ref={capRef}
-          className="flex flex-wrap items-stretch justify-center mt-11 opacity-0 translate-y-2.5"
-          style={{ gap: 0 }}
+          className="hidden sm:grid sm:grid-cols-2 md:flex md:flex-wrap items-stretch justify-center mt-10 sm:mt-11 opacity-0 translate-y-2.5 gap-3 sm:gap-0"
+          style={{}}
         >
           {CAPABILITIES.map((cap, i) => (
             <div
               key={cap.label}
-              className="group px-6 py-1 text-left"
+              className="group px-3 sm:px-6 py-1 text-left"
               style={{
                 borderLeft:
                   i === 0 ? 'none' : '1px solid rgba(240, 237, 230, 0.1)',
@@ -307,11 +304,11 @@ export default function Hero({ onNavigate }: HeroProps) {
         {/* CTA row */}
         <div
           ref={ctaRowRef}
-          className="flex items-center justify-center gap-8 mt-12 opacity-0 translate-y-2.5"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mt-12 opacity-0 translate-y-2.5"
         >
           <button
             onClick={() => onNavigate('work')}
-            className="group inline-flex items-center gap-2 font-space text-[13px] font-semibold uppercase tracking-[0.1em] transition-all duration-300"
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 font-space text-[13px] font-semibold uppercase tracking-[0.1em] transition-all duration-300"
             style={{
               color: '#07070A',
               background: GOLD,
@@ -336,7 +333,7 @@ export default function Hero({ onNavigate }: HeroProps) {
 
           <button
             onClick={() => onNavigate('contact')}
-            className="group inline-flex items-center gap-1.5 font-space text-[13px] font-medium uppercase tracking-[0.1em] transition-opacity duration-300 hover:opacity-70"
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-1.5 font-space text-[13px] font-medium uppercase tracking-[0.1em] transition-opacity duration-300 hover:opacity-70"
             style={{ color: INK }}
           >
             Get In Touch
@@ -347,7 +344,7 @@ export default function Hero({ onNavigate }: HeroProps) {
         {/* Quiet identity line — presence, not the pitch */}
         <div
           ref={bylineRef}
-          className="font-mono-jb text-[10px] uppercase tracking-[0.15em] mt-10 opacity-0"
+          className="hidden sm:block font-mono-jb text-[10px] uppercase tracking-[0.15em] mt-10 opacity-0"
           style={{ color: 'rgba(138, 138, 154, 0.55)' }}
         >
           Ehsan ul Haq — engineering this, end to end
@@ -357,7 +354,7 @@ export default function Hero({ onNavigate }: HeroProps) {
       {/* Scroll indicator */}
       <div
         ref={scrollRef}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
+        className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
         style={{
           width: '1px',
           height: '32px',

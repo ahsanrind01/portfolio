@@ -21,17 +21,19 @@ export default function App() {
     });
 
     lenisRef.current = lenis;
+    let rafId = 0;
 
     function raf(time: number) {
       if (!document.hidden) {
         lenis.raf(time);
       }
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);

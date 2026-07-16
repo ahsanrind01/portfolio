@@ -53,7 +53,7 @@ export default function About() {
         WebkitBackdropFilter: 'blur(5px)',
       }}
     >
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-[120px]">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-12 py-20 md:py-[120px]">
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">
           {/* Text column - 50% */}
           <div className="md:w-1/2">
@@ -66,7 +66,7 @@ export default function About() {
             <h2
               className="about-animate font-space font-bold uppercase"
               style={{
-                fontSize: 'clamp(40px, 6vw, 64px)',
+                fontSize: 'clamp(32px, 6vw, 64px)',
                 lineHeight: 0.95,
                 letterSpacing: '-0.02em',
                 color: '#F0EDE6',
@@ -77,9 +77,9 @@ export default function About() {
 
             <div className="mt-9 space-y-5">
               <p
-                className="about-animate"
-                style={{
-                  fontSize: '19px',
+              className="about-animate"
+              style={{
+                  fontSize: 'clamp(16px, 1.5vw, 19px)',
                   color: '#F0EDE6',
                   lineHeight: 1.55,
                   letterSpacing: '0.01em',
@@ -89,13 +89,13 @@ export default function About() {
                 I don't start with a framework. I start with the constraints — how data moves, where it can fail, what happens under load — The implementation comes afterwards.
               </p>
               <p
-                className="about-animate text-[17px]"
+                className="about-animate text-[15px] md:text-[17px]"
                 style={{ color: '#8A8A9A', lineHeight: 1.65, letterSpacing: '0.01em' }}
               >
-                My focus is backend engineering and distributed systems: I spend most of my time building systems where consistency, reliability and communication between services matter more than the UI they're powering., architectures that fail predictably instead of catastrophically. NexusTrade and Planora exist because reading about a matching engine or a real-time chat pipeline only explains so much — building one is where the design actually gets tested.
+                My focus is backend engineering and distributed systems: I spend most of my time building systems where consistency, reliability and communication between services matter more than the UI they're powering. NexusTrade and Planora exist because reading about a matching engine or a real-time chat pipeline only explains so much — building one is where the design actually gets tested.
               </p>
               <p
-                className="about-animate text-[17px]"
+                className="about-animate text-[15px] md:text-[17px]"
                 style={{ color: '#8A8A9A', lineHeight: 1.65, letterSpacing: '0.01em' }}
               >
                 I'm still early in this, studying Software Engineering at COMSATS, but the questions I ask are the ones I'll keep asking at any scale: why this tradeoff, why this boundary, why does it break here and not there.
@@ -107,7 +107,7 @@ export default function About() {
               className="about-animate mt-10 pt-8"
               style={{ borderTop: '1px solid rgba(240, 237, 230, 0.08)' }}
             >
-              <p className="text-[17px] font-semibold" style={{ color: '#F0EDE6' }}>
+              <p className="text-[15px] md:text-[17px] font-semibold" style={{ color: '#F0EDE6' }}>
                 COMSATS University Islamabad
               </p>
               <p className="mt-1 text-sm" style={{ color: '#8A8A9A' }}>

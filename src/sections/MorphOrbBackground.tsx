@@ -129,7 +129,7 @@ export default function MorphOrbBackground() {
     if (!mountEl) return;
 
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 1000 : 2200;
+    const particleCount = isMobile ? 800 : 1800;
     const spread = 120;
 
     // Scene setup
@@ -147,7 +147,7 @@ export default function MorphOrbBackground() {
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     mountEl.appendChild(renderer.domElement);
 
     const canvasEl = renderer.domElement;
@@ -210,7 +210,7 @@ export default function MorphOrbBackground() {
 
     const uniforms = {
       uTime: { value: 0.0 },
-      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.25) },
       uOpacity: { value: 0.9 },
     };
 
@@ -238,7 +238,7 @@ export default function MorphOrbBackground() {
     graphGroup.position.z = -14;
     scene.add(graphGroup);
 
-    const nodeCount = isMobile ? 10 : 18;
+    const nodeCount = isMobile ? 8 : 14;
     const nodeSpreadX = 55;
     const nodeSpreadY = 65;
     const nodeSpreadZ = 16;
@@ -295,7 +295,7 @@ export default function MorphOrbBackground() {
     nodeGeometry.setAttribute('size', new THREE.BufferAttribute(nodeSizes, 1));
     const nodeUniforms = {
       uTime: { value: 0.0 },
-      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.25) },
       uOpacity: { value: 1.0 },
     };
     const nodeMaterial = new THREE.ShaderMaterial({
@@ -343,15 +343,14 @@ export default function MorphOrbBackground() {
     // Each frame we measure how much of the viewport each theme currently
     // occupies and smoothly ease toward that ratio, so the background never
     // "snaps" — it drifts continuously as sections cross the viewport.
-    const themeEls = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-bg-theme]')
-    );
+    const themeEls = Array.from(document.querySelectorAll<HTMLElement>('[data-bg-theme]'));
     const darkBgColor = new THREE.Color(0x07070a);
     const lightBgColor = new THREE.Color(0xf5f3ee);
     const currentBgColor = new THREE.Color(0x07070a);
     let themeBlend = 0; // 0 = fully dark theme, 1 = fully light theme
+    let targetThemeBlend = 0;
 
-    const getTargetThemeBlend = () => {
+    const updateTargetThemeBlend = () => {
       let darkCoverage = 0;
       let lightCoverage = 0;
       const vh = window.innerHeight;
@@ -363,7 +362,7 @@ export default function MorphOrbBackground() {
         else darkCoverage += visible;
       }
       const total = darkCoverage + lightCoverage;
-      return total > 0 ? lightCoverage / total : themeBlend;
+      targetThemeBlend = total > 0 ? lightCoverage / total : themeBlend;
     };
 
     const getScrollProgress = () => {
@@ -374,6 +373,15 @@ export default function MorphOrbBackground() {
     const onMouseMove = (e: MouseEvent) => {
       mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    let themeBlendRaf = 0;
+    const scheduleThemeBlendUpdate = () => {
+      if (themeBlendRaf) return;
+      themeBlendRaf = requestAnimationFrame(() => {
+        themeBlendRaf = 0;
+        updateTargetThemeBlend();
+      });
     };
 
     let resizePending = false;
@@ -389,9 +397,10 @@ export default function MorphOrbBackground() {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.setSize(w, h);
-        const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+        const pixelRatio = Math.min(window.devicePixelRatio, 1.25);
         material.uniforms.uPixelRatio.value = pixelRatio;
         nodeMaterial.uniforms.uPixelRatio.value = pixelRatio;
+        updateTargetThemeBlend();
       });
     };
 
@@ -404,10 +413,13 @@ export default function MorphOrbBackground() {
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', scheduleThemeBlendUpdate, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     // Check reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    updateTargetThemeBlend();
 
     const animate = () => {
       if (document.hidden) {
@@ -425,8 +437,7 @@ export default function MorphOrbBackground() {
       mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
       // Ease the theme blend toward whatever the current scroll position calls for
-      const targetBlend = getTargetThemeBlend();
-      themeBlend += (targetBlend - themeBlend) * 0.05;
+      themeBlend += (targetThemeBlend - themeBlend) * 0.05;
 
       currentBgColor.lerpColors(darkBgColor, lightBgColor, themeBlend);
       scene.background = currentBgColor;
@@ -624,8 +635,10 @@ export default function MorphOrbBackground() {
     return () => {
       cancelAnimationFrame(animationId);
       cancelAnimationFrame(resizeRafId);
+      cancelAnimationFrame(themeBlendRaf);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', scheduleThemeBlendUpdate);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       renderer.dispose();
       geometry.dispose();
