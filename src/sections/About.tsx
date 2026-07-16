@@ -29,12 +29,15 @@ export default function About() {
     return () => ctx.revert();
   }, []);
 
-  const coursework = [
-    'Software Design & Architecture',
-    'Requirements Engineering',
-    'OOP',
-    'Data Structures & Algorithms',
-    'Database Systems',
+  const stack = [
+    'Node.js',
+    'TypeScript',
+    'PostgreSQL',
+    'MongoDB',
+    'Redis',
+    'Kafka',
+    'WebSockets',
+    'Docker',
   ];
 
   return (
@@ -72,18 +75,30 @@ export default function About() {
               THE ENGINEER
             </h2>
 
-            <div className="mt-8 space-y-5">
+            <div className="mt-9 space-y-5">
               <p
-                className="about-animate text-[17px]"
-                style={{ color: '#8A8A9A', lineHeight: 1.65, letterSpacing: '0.01em' }}
+                className="about-animate"
+                style={{
+                  fontSize: '19px',
+                  color: '#F0EDE6',
+                  lineHeight: 1.55,
+                  letterSpacing: '0.01em',
+                  fontWeight: 500,
+                }}
               >
-                Software Engineering student at COMSATS University Islamabad with hands-on experience building full-stack and mobile applications. Proven ability to architect and deliver production-ready systems using React Native, Node.js, and MongoDB.
+                I don't start with a framework. I start with the constraints — how data moves, where it can fail, what happens under load — The implementation comes afterwards.
               </p>
               <p
                 className="about-animate text-[17px]"
                 style={{ color: '#8A8A9A', lineHeight: 1.65, letterSpacing: '0.01em' }}
               >
-                Ranked 1st in class during Semester 1 with a CGPA of 3.45/4.0. Strong foundation in software design principles, data structures, and system architecture.
+                My focus is backend engineering and distributed systems: I spend most of my time building systems where consistency, reliability and communication between services matter more than the UI they're powering., architectures that fail predictably instead of catastrophically. NexusTrade and Planora exist because reading about a matching engine or a real-time chat pipeline only explains so much — building one is where the design actually gets tested.
+              </p>
+              <p
+                className="about-animate text-[17px]"
+                style={{ color: '#8A8A9A', lineHeight: 1.65, letterSpacing: '0.01em' }}
+              >
+                I'm still early in this, studying Software Engineering at COMSATS, but the questions I ask are the ones I'll keep asking at any scale: why this tradeoff, why this boundary, why does it break here and not there.
               </p>
             </div>
 
@@ -98,35 +113,17 @@ export default function About() {
               <p className="mt-1 text-sm" style={{ color: '#8A8A9A' }}>
                 BS Software Engineering · 2024 – Present · Expected 2028
               </p>
-              <p className="mt-1 text-sm" style={{ color: '#8A8A9A' }}>
-                CGPA: 3.45/4.0
-              </p>
             </div>
 
-            {/* Coursework */}
+            {/* Core stack */}
             <div className="about-animate mt-8">
               <p className="font-mono text-[11px] uppercase tracking-[0.08em] mb-3" style={{ color: '#6B6B7B' }}>
-                Key Coursework
+                Core Stack
               </p>
               <p className="font-mono text-[12px]" style={{ color: '#8A8A9A', lineHeight: 1.6 }}>
-                {coursework.join(' · ')}
+                {stack.join(' · ')}
               </p>
             </div>
-          </div>
-
-          {/* Decorative column - 50% */}
-          <div className="hidden md:flex md:w-1/2 items-center justify-center">
-            <span
-              className="font-space font-bold select-none"
-              style={{
-                fontSize: 'clamp(140px, 16vw, 200px)',
-                color: 'rgba(212, 168, 83, 0.06)',
-                lineHeight: 0.9,
-                letterSpacing: '-0.03em',
-              }}
-            >
-              01
-            </span>
           </div>
         </div>
       </div>

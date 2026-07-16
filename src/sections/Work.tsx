@@ -76,11 +76,11 @@ const projects: Project[] = [
     eyebrow: 'Featured · Distributed Systems',
     title: 'NexusTrade',
     valueLine:
-      'A cryptocurrency exchange simulated as nine cooperating services — event-driven, horizontally decomposed, built to mirror how real exchanges scale.',
+      'Distributed cryptocurrency exchange with real-time order matching, Kafka event streaming, and horizontally scalable microservices.',
     capabilities: [
-      'Event-Driven Architecture',
-      'Real-Time Order Matching',
-      'Distributed Consistency',
+      'Real-Time Matching',
+      'Kafka Events',
+      'Microservices',
       'Live Market Data',
     ],
     stack: ['Node.js', 'TypeScript', 'PostgreSQL', 'Redis', 'Kafka', 'WebSockets', 'JWT', 'Docker'],
@@ -143,7 +143,7 @@ const projects: Project[] = [
     valueLine:
       'One app, two experiences — customers book local services instantly, while business owners run their entire operation from the same codebase.',
     capabilities: ['Role-Based Experiences', 'Real-Time Chat', 'Payment-Gated Bookings', 'Push Notifications'],
-    stack: ['React', 'React Native', 'Node.js', 'Express', 'MongoDB', 'Firebase'],
+    stack: ['React Native', 'Node.js', 'Express', 'MongoDB', 'Socket.IO', 'Stripe', 'JWT',],
     links: [
       { label: 'Live Demo', url: 'https://appetize.io/app/ios/com.ahsanrind.mobileapp?device=iphone15promax&osVersion=17.2&toolbar=true' },
       { label: 'Source', url: 'https://github.com/ahsanrind01/Planora' },
@@ -155,8 +155,8 @@ const projects: Project[] = [
       problem:
         'Most marketplace side-projects only build the consumer half. The harder, more valuable problem is the operator side — schedules, real-time conversations with customers, and getting paid — without maintaining two separate apps.',
       solution:
-        'One React Native/Expo app routes each user into a customer flow or a manager flow based on role, backed by a single Node/Express API, MongoDB for data, and Socket.IO for realtime chat — one deployable app instead of two, with Stripe PaymentIntents confirming payment before any booking is ever persisted.',
-      architectureImage: '/media/planora-architecture.png',
+        'One React Native/Expo app routes each user into a customer flow or a manager flow based on role, backed by a single Node/Express API, MongoDB for data, and Socket.IO for realtime chat — Bookings are confirmed only after successful Stripe payment.',
+      architectureImage: '/assets/planora-architecture.png',
       decisions: [
         {
           title: 'Shared codebase, split by role',
@@ -181,14 +181,15 @@ const projects: Project[] = [
           detail: 'Real-time chat had to stay consistent across the spotty connections mobile networks are known for.',
         },
         {
-          title: 'Exactly-once notifications',
-          detail: 'Push (Expo) and email (SendGrid) had to fire exactly once per booking-lifecycle event, not zero or two.',
-        },
+          title: 'Coordinating booking state',
+          detail:
+            'Keeping bookings, payments, notifications, and chat synchronized while avoiding inconsistent states.'
+        }
       ],
       implementation: [
         'Expo push tokens registered per device and tied to booking-lifecycle events.',
         'JWT auth issues role-scoped tokens shared across both the customer and manager flows.',
-        'A booking-lifecycle state machine drives every downstream notification.',
+        'Booking status changes trigger the appropriate push notifications and customer updates.',
       ],
       lessonsLearned: [
         'Shared code is only a win if both flows stay legible on their own — some duplication was the more honest choice.',
@@ -202,74 +203,240 @@ const projects: Project[] = [
 
 /* ── Fallback architecture diagrams (shown until a real diagram image is added, or on load error) ── */
 
-function PlanoraDiagram() {
+export function PlanoraDiagram() {
+
+  const GOLD = '#D4A853';
+  const INK = '#F0EDE6';
+  const BLUE = '#6FA8D8';
+  const TEAL = '#6FBF9E';
+  const CORAL = '#E0937A';
+  const ORANGE = '#E0A972';
+  const services = [
+    { label: 'AUTH & USERS', sub: 'login, profile, roles', x: 18 },
+    { label: 'BUSINESS', sub: 'listings, catalog', x: 85 },
+    { label: 'BOOKINGS', sub: 'create, schedule', x: 152 },
+    { label: 'CHAT', sub: 'conversations, msgs', x: 219 },
+    { label: 'PAYMENTS', sub: 'Stripe intents', x: 286 },
+  ];
+
   return (
-    <svg viewBox="0 0 400 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
-      <line x1="82" y1="75" x2="200" y2="75" stroke={GOLD} strokeOpacity="0.35" strokeWidth="1" />
-      <line x1="200" y1="75" x2="318" y2="75" stroke={GOLD} strokeOpacity="0.35" strokeWidth="1" />
-      <circle cx="200" cy="75" r="30" fill="rgba(212,168,83,0.06)" stroke={GOLD} strokeOpacity="0.5" strokeWidth="1.2" />
-      <text x="200" y="72" textAnchor="middle" fill={INK} fontSize="9" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.5">
-        PLANORA
-      </text>
-      <text x="200" y="83" textAnchor="middle" fill={MUTE} fontSize="7" fontFamily="'JetBrains Mono', monospace">
-        API
-      </text>
-      <circle cx="60" cy="75" r="26" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.18" strokeWidth="1" />
-      <text x="60" y="73" textAnchor="middle" fill={INK} fontSize="7.5" fontFamily="'JetBrains Mono', monospace">
-        CUSTOMER
-      </text>
-      <text x="60" y="83" textAnchor="middle" fill={MUTE} fontSize="6.5" fontFamily="'JetBrains Mono', monospace">
-        book &amp; pay
-      </text>
-      <circle cx="340" cy="75" r="26" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.18" strokeWidth="1" />
-      <text x="340" y="73" textAnchor="middle" fill={INK} fontSize="7.5" fontFamily="'JetBrains Mono', monospace">
-        MANAGER
-      </text>
-      <text x="340" y="83" textAnchor="middle" fill={MUTE} fontSize="6.5" fontFamily="'JetBrains Mono', monospace">
-        run business
-      </text>
-      <g transform="translate(141,40)">
-        <rect width="18" height="14" rx="3" fill="none" stroke={GOLD} strokeOpacity="0.55" strokeWidth="1" />
-        <text x="9" y="26" textAnchor="middle" fill={MUTE} fontSize="6" fontFamily="'JetBrains Mono', monospace">chat</text>
-      </g>
-      <g transform="translate(241,40)">
-        <rect width="18" height="14" rx="3" fill="none" stroke={GOLD} strokeOpacity="0.55" strokeWidth="1" />
-        <text x="9" y="26" textAnchor="middle" fill={MUTE} fontSize="6" fontFamily="'JetBrains Mono', monospace">pay</text>
-      </g>
+    <svg
+      viewBox="0 0 400 340"
+      width="100%"
+      height="100%"
+      preserveAspectRatio="xMidYMid meet"
+      style={{ overflow: 'visible', fontFamily: "'JetBrains Mono', monospace" }}
+    >
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke={INK} strokeOpacity="0.4" strokeWidth="1.2" />
+        </marker>
+      </defs>
+
+      {/* WebSocket label + curved dashed line back to Mobile app */}
+      <text x="6" y="66" fill={GOLD} fillOpacity="0.6" fontSize="6" letterSpacing="0.3">WebSocket</text>
+      <path
+        d="M 348 200 C 250 140, 150 40, 148 20"
+        fill="none"
+        stroke={GOLD}
+        strokeOpacity="0.5"
+        strokeWidth="1"
+        strokeDasharray="3 3"
+        markerEnd="url(#arrow2)"
+      />
+
+      {/* Mobile app */}
+      <rect x="130" y="4" width="140" height="24" rx="4" fill="rgba(212,168,83,0.06)" stroke={GOLD} strokeOpacity="0.45" strokeWidth="1" />
+      <text x="200" y="14" textAnchor="middle" fill={INK} fontSize="7">Mobile app</text>
+      <text x="200" y="23" textAnchor="middle" fill={INK} fillOpacity="0.55" fontSize="5">React Native, Expo</text>
+      <line x1="200" y1="28" x2="200" y2="38" stroke={INK} strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrow2)" />
+
+      {/* Backend API */}
+      <rect x="120" y="40" width="160" height="34" rx="4" fill="rgba(212,168,83,0.08)" stroke={GOLD} strokeOpacity="0.55" strokeWidth="1" />
+      <text x="200" y="51" textAnchor="middle" fill={INK} fontSize="7.5">Backend API</text>
+      <text x="200" y="60" textAnchor="middle" fill={INK} fillOpacity="0.55" fontSize="4.6">Express 5, single server, port 3000</text>
+      <text x="200" y="68" textAnchor="middle" fill={INK} fillOpacity="0.55" fontSize="4.6">JWT auth, CORS, routing</text>
+
+      {/* Fan lines to services */}
+      {services.map((s) => (
+        <line key={`l-${s.label}`} x1="200" y1="74" x2={s.x + 31} y2="88" stroke={INK} strokeOpacity="0.14" strokeWidth="1" />
+      ))}
+
+      {/* Service boxes */}
+      {services.map((s) => (
+        <g key={s.label}>
+          <rect x={s.x} y="88" width="62" height="30" rx="4" fill="rgba(111,168,216,0.07)" stroke={BLUE} strokeOpacity="0.5" strokeWidth="1" />
+          <text x={s.x + 31} y="100" textAnchor="middle" fill={BLUE} fontSize="4.6">{s.label}</text>
+          <text x={s.x + 31} y="109" textAnchor="middle" fill={BLUE} fillOpacity="0.6" fontSize="4">{s.sub}</text>
+        </g>
+      ))}
+
+      {/* Stripe (external) */}
+      <line x1="348" y1="103" x2="358" y2="103" stroke={INK} strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrow2)" />
+      <rect x="358" y="90" width="34" height="26" rx="3" fill="rgba(224,147,122,0.06)" stroke={CORAL} strokeOpacity="0.5" strokeWidth="1" strokeDasharray="2 2" />
+      <text x="375" y="101" textAnchor="middle" fill={CORAL} fontSize="4.4">Stripe</text>
+      <text x="375" y="109" textAnchor="middle" fill={CORAL} fillOpacity="0.6" fontSize="3.8">Payments</text>
+
+      {/* reads & writes collector */}
+      <line x1="183" y1="118" x2="183" y2="132" stroke={INK} strokeOpacity="0.25" strokeWidth="1" strokeDasharray="2 2" />
+      <line x1="183" y1="132" x2="317" y2="132" stroke={INK} strokeOpacity="0.25" strokeWidth="1" />
+      <text x="250" y="128" textAnchor="middle" fill={INK} fillOpacity="0.4" fontSize="4.4">reads & writes</text>
+      <line x1="183" y1="132" x2="183" y2="144" stroke={INK} strokeOpacity="0.25" strokeWidth="1" strokeDasharray="2 2" markerEnd="url(#arrow2)" />
+      <line x1="317" y1="132" x2="317" y2="144" stroke={INK} strokeOpacity="0.25" strokeWidth="1" markerEnd="url(#arrow2)" />
+
+      {/* Shared infrastructure */}
+      <rect x="10" y="146" width="235" height="72" rx="6" fill="rgba(240,237,230,0.02)" stroke={INK} strokeOpacity="0.18" strokeWidth="1" strokeDasharray="3 3" />
+      <text x="20" y="160" fill={INK} fillOpacity="0.55" fontSize="6">Shared infrastructure</text>
+      <rect x="20" y="168" width="105" height="42" rx="4" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.25" strokeWidth="1" />
+      <text x="72" y="185" textAnchor="middle" fill={INK} fontSize="5.4">MongoDB</text>
+      <text x="72" y="194" textAnchor="middle" fill={INK} fillOpacity="0.6" fontSize="4.2">Service-owned collections</text>
+      <rect x="130" y="168" width="105" height="42" rx="4" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.25" strokeWidth="1" />
+      <text x="182" y="185" textAnchor="middle" fill={INK} fontSize="5.4">Local disk</text>
+      <text x="182" y="194" textAnchor="middle" fill={INK} fillOpacity="0.6" fontSize="4.2">Uploaded images</text>
+
+      {/* Event bus */}
+      <rect x="255" y="146" width="135" height="40" rx="6" fill="rgba(224,169,114,0.07)" stroke={ORANGE} strokeOpacity="0.55" strokeWidth="1" />
+      <text x="322" y="162" textAnchor="middle" fill={ORANGE} fontSize="6.4">Event bus</text>
+      <text x="322" y="172" textAnchor="middle" fill={ORANGE} fillOpacity="0.6" fontSize="4">Node EventEmitter</text>
+      <text x="322" y="180" textAnchor="middle" fill={ORANGE} fillOpacity="0.6" fontSize="4">bookingCreated, newMessage</text>
+
+      {/* Event bus fan out */}
+      <line x1="283" y1="186" x2="283" y2="192" stroke={ORANGE} strokeOpacity="0.4" strokeWidth="1" />
+      <line x1="360" y1="186" x2="360" y2="192" stroke={ORANGE} strokeOpacity="0.4" strokeWidth="1" />
+      <line x1="283" y1="192" x2="360" y2="192" stroke={ORANGE} strokeOpacity="0.4" strokeWidth="1" />
+      <line x1="283" y1="192" x2="283" y2="202" stroke={ORANGE} strokeOpacity="0.4" strokeWidth="1" markerEnd="url(#arrow2)" />
+      <line x1="360" y1="192" x2="360" y2="202" stroke={ORANGE} strokeOpacity="0.4" strokeWidth="1" markerEnd="url(#arrow2)" />
+
+      {/* Notification worker + Socket.io broadcaster */}
+      <rect x="252" y="204" width="62" height="34" rx="4" fill="rgba(111,191,158,0.07)" stroke={TEAL} strokeOpacity="0.5" strokeWidth="1" />
+      <text x="283" y="217" textAnchor="middle" fill={TEAL} fontSize="4.6">Notification worker</text>
+      <text x="283" y="226" textAnchor="middle" fill={TEAL} fillOpacity="0.6" fontSize="3.8">booking email + push</text>
+
+      <rect x="329" y="204" width="62" height="34" rx="4" fill="rgba(111,191,158,0.07)" stroke={TEAL} strokeOpacity="0.5" strokeWidth="1" />
+      <text x="360" y="217" textAnchor="middle" fill={TEAL} fontSize="4.6">Socket.io broadcaster</text>
+      <text x="360" y="226" textAnchor="middle" fill={TEAL} fillOpacity="0.6" fontSize="3.8">real-time chat delivery</text>
+
+      {/* Notification worker -> SendGrid / Expo */}
+      <line x1="283" y1="238" x2="283" y2="244" stroke={INK} strokeOpacity="0.3" strokeWidth="1" />
+      <line x1="263" y1="244" x2="303" y2="244" stroke={INK} strokeOpacity="0.3" strokeWidth="1" />
+      <line x1="263" y1="244" x2="263" y2="252" stroke={INK} strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrow2)" />
+      <line x1="303" y1="244" x2="303" y2="252" stroke={INK} strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrow2)" />
+
+      <rect x="243" y="254" width="40" height="24" rx="3" fill="rgba(224,147,122,0.06)" stroke={CORAL} strokeOpacity="0.5" strokeWidth="1" strokeDasharray="2 2" />
+      <text x="263" y="264" textAnchor="middle" fill={CORAL} fontSize="4.2">SendGrid</text>
+      <text x="263" y="272" textAnchor="middle" fill={CORAL} fillOpacity="0.6" fontSize="3.8">Email</text>
+
+      <rect x="283" y="254" width="40" height="24" rx="3" fill="rgba(224,147,122,0.06)" stroke={CORAL} strokeOpacity="0.5" strokeWidth="1" strokeDasharray="2 2" />
+      <text x="303" y="264" textAnchor="middle" fill={CORAL} fontSize="4.2">Expo</text>
+      <text x="303" y="272" textAnchor="middle" fill={CORAL} fillOpacity="0.6" fontSize="3.8">Push</text>
     </svg>
   );
 }
 
-function NexusTradeDiagram() {
+export function NexusTradeDiagram() {
+
+  const GOLD = '#D4A853';
+  const INK = '#F0EDE6';
+  const TEAL = '#6FBF9E';
+  const CORAL = '#E0937A';
   const services = [
-    { label: 'AUTH', x: 60 },
-    { label: 'ORDERS', x: 140 },
-    { label: 'WALLET', x: 200 },
-    { label: 'LEDGER', x: 260 },
-    { label: 'MARKET', x: 340 },
+    { label: 'AUTH', port: '3007', x: 60 },
+    { label: 'ORDER', port: '3001', x: 130 },
+    { label: 'WALLET', port: '3004', x: 200 },
+    { label: 'MARKET', port: '3003', x: 270 },
+    { label: 'FUNDING', port: '3005', x: 340 },
   ];
+
+  const downstream = [
+    { label: 'MATCHING ENGINE', sub: 'Order book matching', x: 70 },
+    { label: 'LEDGER SERVICE', sub: 'Balance settlement', x: 200 },
+    { label: 'LIQUIDITY BOT', sub: 'Automated liquidity', x: 330 },
+  ];
+
   return (
-    <svg viewBox="0 0 400 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
-      <rect x="150" y="18" width="100" height="26" rx="4" fill="rgba(212,168,83,0.08)" stroke={GOLD} strokeOpacity="0.55" strokeWidth="1" />
-      <text x="200" y="35" textAnchor="middle" fill={INK} fontSize="8.5" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.5">
-        API GATEWAY
-      </text>
-      {services.map((s) => (
-        <line key={`l-${s.label}`} x1="200" y1="44" x2={s.x} y2="92" stroke={INK} strokeOpacity="0.14" strokeWidth="1" />
-      ))}
-      {services.map((s) => (
-        <g key={s.label}>
-          <circle cx={s.x} cy="104" r="20" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.2" strokeWidth="1" />
-          <text x={s.x} y="107" textAnchor="middle" fill={INK} fontSize="6.3" fontFamily="'JetBrains Mono', monospace">
-            {s.label}
-          </text>
-        </g>
-      ))}
-      <line x1="30" y1="134" x2="370" y2="134" stroke={GOLD} strokeOpacity="0.4" strokeWidth="1" strokeDasharray="3 4" />
-      <text x="200" y="147" textAnchor="middle" fill={GOLD} fontSize="6.5" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.6">
-        KAFKA EVENT BUS
-      </text>
-    </svg>
+    <div className="w-full h-full flex items-center justify-center">
+      <svg
+        viewBox="0 0 400 292"
+        width="100%"
+        style={{ display: 'block', overflow: 'visible', fontFamily: "'JetBrains Mono', monospace" }}
+      >
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke={INK} strokeOpacity="0.4" strokeWidth="1.2" />
+          </marker>
+        </defs>
+
+        {/* Mobile app */}
+        <rect x="150" y="4" width="100" height="22" rx="4" fill="rgba(212,168,83,0.06)" stroke={GOLD} strokeOpacity="0.45" strokeWidth="1" />
+        <text x="200" y="18" textAnchor="middle" fill={INK} fontSize="7" letterSpacing="0.4">
+          MOBILE APP
+        </text>
+        <line x1="200" y1="26" x2="200" y2="34" stroke={INK} strokeOpacity="0.25" strokeWidth="1" markerEnd="url(#arrow)" />
+
+        {/* API gateway */}
+        <rect x="150" y="36" width="100" height="26" rx="4" fill="rgba(212,168,83,0.08)" stroke={GOLD} strokeOpacity="0.55" strokeWidth="1" />
+        <text x="200" y="52" textAnchor="middle" fill={INK} fontSize="8.5" letterSpacing="0.5">
+          API GATEWAY
+        </text>
+
+        {/* Fan lines to services */}
+        {services.map((s) => (
+          <line key={`l-${s.label}`} x1="200" y1="62" x2={s.x} y2="92" stroke={INK} strokeOpacity="0.14" strokeWidth="1" />
+        ))}
+
+        {/* Service circles */}
+        {services.map((s) => (
+          <g key={s.label}>
+            <circle cx={s.x} cy="104" r="20" fill="rgba(240,237,230,0.03)" stroke={INK} strokeOpacity="0.2" strokeWidth="1" />
+            <text x={s.x} y="101" textAnchor="middle" fill={INK} fontSize="5.6">{s.label}</text>
+            <text x={s.x} y="110" textAnchor="middle" fill={INK} fillOpacity="0.5" fontSize="5.2">{s.port}</text>
+          </g>
+        ))}
+
+        {/* Stripe (external) */}
+        <line x1="360" y1="104" x2="378" y2="104" stroke={INK} strokeOpacity="0.3" strokeWidth="1" markerEnd="url(#arrow)" />
+        <rect x="378" y="90" width="18" height="28" rx="3" fill="rgba(224,147,122,0.06)" stroke={CORAL} strokeOpacity="0.5" strokeWidth="1" strokeDasharray="2 2" />
+        <text x="387" y="102" textAnchor="middle" fill={CORAL} fontSize="4.6">STRIPE</text>
+        <text x="387" y="111" textAnchor="middle" fill={CORAL} fillOpacity="0.6" fontSize="4.2">PAY</text>
+
+        {/* Kafka event bus */}
+        {services.map((s) => (
+          <line key={`k-${s.label}`} x1={s.x} y1="124" x2={s.x} y2="134" stroke={GOLD} strokeOpacity="0.3" strokeWidth="1" />
+        ))}
+        <line x1="30" y1="134" x2="370" y2="134" stroke={GOLD} strokeOpacity="0.4" strokeWidth="1" strokeDasharray="3 4" />
+        <text x="200" y="147" textAnchor="middle" fill={GOLD} fontSize="6.5" letterSpacing="0.6">
+          KAFKA EVENT BUS
+        </text>
+
+        {/* Downstream services */}
+        {downstream.map((d) => (
+          <line key={`d-${d.label}`} x1={d.x + 50} y1="150" x2={d.x + 50} y2="164" stroke={GOLD} strokeOpacity="0.3" strokeWidth="1" />
+        ))}
+        {downstream.map((d) => (
+          <g key={d.label}>
+            <rect x={d.x} y="164" width="100" height="28" rx="4" fill="rgba(111,191,158,0.07)" stroke={TEAL} strokeOpacity="0.5" strokeWidth="1" />
+            <text x={d.x + 50} y="176" textAnchor="middle" fill={TEAL} fontSize="5.4" letterSpacing="0.3">{d.label}</text>
+            <text x={d.x + 50} y="185" textAnchor="middle" fill={TEAL} fillOpacity="0.6" fontSize="4.6">{d.sub}</text>
+          </g>
+        ))}
+
+        {/* Reads & writes to shared infra */}
+        <line x1="250" y1="192" x2="250" y2="210" stroke={INK} strokeOpacity="0.2" strokeWidth="1" strokeDasharray="2 2" />
+        <text x="258" y="203" fill={INK} fillOpacity="0.4" fontSize="4.6">reads & writes</text>
+
+        {/* Shared infrastructure */}
+        <rect x="70" y="212" width="260" height="70" rx="6" fill="rgba(240,237,230,0.02)" stroke={INK} strokeOpacity="0.18" strokeWidth="1" strokeDasharray="3 3" />
+        <text x="82" y="226" fill={INK} fillOpacity="0.55" fontSize="6" letterSpacing="0.4">SHARED INFRASTRUCTURE</text>
+
+        <rect x="84" y="236" width="105" height="34" rx="4" fill="rgba(55,138,221,0.06)" stroke="#378ADD" strokeOpacity="0.4" strokeWidth="1" />
+        <text x="136" y="250" textAnchor="middle" fill="#378ADD" fontSize="5.6">POSTGRESQL</text>
+        <text x="136" y="259" textAnchor="middle" fill="#378ADD" fillOpacity="0.6" fontSize="4.6">Service schemas</text>
+
+        <rect x="211" y="236" width="105" height="34" rx="4" fill="rgba(55,138,221,0.06)" stroke="#378ADD" strokeOpacity="0.4" strokeWidth="1" />
+        <text x="263" y="250" textAnchor="middle" fill="#378ADD" fontSize="5.6">REDIS</text>
+        <text x="263" y="259" textAnchor="middle" fill="#378ADD" fillOpacity="0.6" fontSize="4.6">Wallet, price cache</text>
+      </svg>
+    </div>
   );
 }
 
@@ -277,11 +444,6 @@ const fallbackDiagrams: Record<Project['id'], () => ReactElement> = {
   planora: PlanoraDiagram,
   nexustrade: NexusTradeDiagram,
 };
-
-/* ── iPhone 13 Pro Max mockup ────────────────────────────────────────
-   Real screen ratio (428:926 pt). Both previews are mobile-app captures,
-   so they play inside an actual phone frame instead of a cropped
-   background video — reads as a product, not stretched b-roll. */
 
 function PhoneMockup({
   src,
@@ -300,7 +462,7 @@ function PhoneMockup({
       className="relative mx-auto"
       style={{
         width: widthClamp,
-        aspectRatio: '428 / 926',
+        aspectRatio: '428 / 926', // iPhone 13 Pro Max native ratio — unchanged
         animation: 'phoneFloatY 6s ease-in-out infinite',
       }}
     >
@@ -318,9 +480,9 @@ function PhoneMockup({
       <div
         className="relative w-full h-full"
         style={{
-          borderRadius: '19%',
+          borderRadius: '12%', // was 19% — lower radius = flatter sides, less "capsule"
           background: 'linear-gradient(155deg, #2a2a30 0%, #101013 38%, #0a0a0c 100%)',
-          padding: '3.1%',
+          padding: '2.4%', // slightly thinner bezel, closer to real device proportions
           boxShadow:
             '0 50px 90px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.06)',
         }}
@@ -346,7 +508,7 @@ function PhoneMockup({
         {/* screen */}
         <div
           className="relative w-full h-full overflow-hidden"
-          style={{ borderRadius: '16.5%', background: '#000' }}
+          style={{ borderRadius: '9%', background: '#000' }} // was 16.5% — matches new flatter bezel
         >
           {!failed ? (
             <video
@@ -380,7 +542,13 @@ function PhoneMockup({
           {/* notch */}
           <div
             className="absolute left-1/2 -translate-x-1/2"
-            style={{ top: '2.2%', width: '34%', height: '3.6%', borderRadius: '999px', background: '#000' }}
+            style={{
+              top: '2%',
+              width: '30%',      // slightly narrower — closer to real notch proportions
+              height: '3.2%',
+              borderRadius: '40%', // was 999px (full pill) — real notch is a rounded rect, not a pill
+              background: '#000',
+            }}
           />
         </div>
       </div>
@@ -777,7 +945,7 @@ function CompactProjectCard({ project, cardRef }: { project: Project; cardRef: (
               letterSpacing: '-0.01em',
               color: INK,
             }}
-            
+
           >
             {project.title}
           </h3>
